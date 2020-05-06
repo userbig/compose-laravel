@@ -1,0 +1,103 @@
+version: '3.2'
+
+networks:
+  backend-network:
+    driver: bridge
+  frontend-network:
+    driver: bridge
+
+services:
+  app:
+    image: ${BASE_CONTAINER}:latest
+    container_name: ${PREFIX}-site
+    user: "user:group"
+    build:
+      context: ./docker/app
+      dockerfile: Dockerfile
+    # image: php:7.2.10-fpm-alpine
+    ports:
+      - "9009:9009"
+    expose:
+      - 9009
+    volumes:
+      - ./src:/app:rw
+    # restart: always
+    networks:
+      - backend-network
+      - frontend-network
+    environment:
+      CONTAINER_ROLE: app
+
+
+  scheduler:
+    image: ${BASE_CONTAINER}:latest
+    container_name: ${PREFIX}-scheduler
+    user: "user:group"
+    volumes:
+      - ./src:/app:rw
+    networks:
+      - backend-network
+      - frontend-network
+    environment:
+      CONTAINER_ROLE: scheduler
+    depends_on:
+      - app
+
+  queue:
+    image: ${BASE_CONTAINER}:latest
+    container_name: ${PREFIX}-queue
+    user: "user:group"
+    volumes:
+      - ./src:/app:rw
+    networks:
+      - backend-network
+      - frontend-network
+    environment:
+      CONTAINER_ROLE: queue
+    depends_on:
+      - app
+
+  redis:
+    restart: always
+    image: redis:6.0.1-alpine
+    container_name: ${PREFIX}-redis
+    domainname: redis
+    expose:
+      - "6379"
+    networks:
+      - backend-network
+
+  nginx:
+    image: nginx:1.15.8-alpine
+    restart: always
+    environment:
+      ROOT_DIR: '/app/public'
+    volumes:
+      - ./src:/app
+      - ./docker/nginx/site.conf:/etc/nginx/conf.d/site.conf:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    expose:
+      - 80
+    networks:
+      - frontend-network
+
+  postgres:
+    image: postgres:12.0-alpine
+    container_name: ${PREFIX}-postgres
+    domainname: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    expose:
+      - 5432
+    environment:
+      - DEBUG=true
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./docker/db/postgres/data:/var/lib/postgresql/data
+    networks:
+      - backend-network
