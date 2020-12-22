@@ -28,7 +28,6 @@ services:
     environment:
       CONTAINER_ROLE: app
 
-
   scheduler:
     image: ${BASE_CONTAINER}:latest
     container_name: ${PREFIX}-scheduler
@@ -101,3 +100,11 @@ services:
       - ./docker/db/postgres/data:/var/lib/postgresql/data
     networks:
       - backend-network
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: ${PREFIX}-mailhog
+    environment:
+      - MH_STORAGE=maildir
+    ports:
+      - "8025:8025"
