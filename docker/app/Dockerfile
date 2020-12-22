@@ -1,4 +1,4 @@
-FROM php:7.4.4-fpm-alpine
+FROM php:7.4.13-fpm-alpine
 
 LABEL Description="Application container"
 
@@ -97,23 +97,15 @@ ARG GROUP_ID=1000
 RUN set -x \
 	&& mkdir -p /app
 
-#COPY ./src /app
-
 RUN set -x ; \
       addgroup -g ${GROUP_ID} -S group ; \
       adduser -u ${USER_ID}  -D -S -G group -s /bin/bash user; \
       chown -R ${USER_ID}:${GROUP_ID} /app;
 
 
-
-
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-
 COPY ./start.sh /usr/local/bin/start
-
-#RUN chown -R www-data:www-data /app \
-#    && chmod u+x /usr/local/bin/start
 
 WORKDIR /app
 
