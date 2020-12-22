@@ -1,8 +1,13 @@
 # Base for quick dev start for Laravel (and lumen i hope) and postgesql
 
+### ENV
+Copy `.env.example` and rename it to .env
+`cp .env.example .env`
+
 
 
 ### MAILHOG
+Laravel `.env` config
 ```dotenv
 MAIL_MAILER=smtp
 MAIL_HOST=${PREFIX}-mailhog <--- change due to your .env file
