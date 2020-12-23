@@ -108,3 +108,6 @@ services:
       - MH_STORAGE=maildir
     ports:
       - "8025:8025"
+    networks:
+      - backend-network
+      - frontend-network
